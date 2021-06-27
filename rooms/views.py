@@ -1,6 +1,6 @@
 from rest_framework.generics import ListAPIView, RetrieveAPIView
 from .models import Room
-from .serializer import RoomSerializer, BigRoomSerializer
+from .serializer import RoomSerializer
 
 
 class ListRoomsView(ListAPIView):
@@ -10,5 +10,5 @@ class ListRoomsView(ListAPIView):
 
 class SeeRoomView(RetrieveAPIView):
     queryset = Room.objects.all()
-    serializer_class = BigRoomSerializer
+    serializer_class = RoomSerializer
 
