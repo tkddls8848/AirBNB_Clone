@@ -21,6 +21,7 @@ class ReadRoomSerializer(serializers.ModelSerializer):
                 print("Validate Room OK")
                 return data
 
+
 class WriteRoomSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=140)
     address = serializers.CharField(max_length=140)
@@ -38,12 +39,13 @@ class WriteRoomSerializer(serializers.Serializer):
         return Room.objects.create(**validated_data)
 
     def validate(self, data):
-        if data["beds"] < 5:
-            raise serializers.ValidationError("Room is too small")
-        else:
-            if data["check_in"] == data["check_out"]:
+        if not self.instance:
+            if data.get("check_in") == data.get("check_out"):
+                print(data.get("check_in"), data.get("check_out"))
                 raise serializers.ValidationError("Room is Big. but, Not Enough Time to Check out")
-            else:
-                print("Validate Room OK")
-                return data
+        else:
+            print("Validate Room OK")
+            return data
 
+    def update(self, instance, validated_data):
+        pass

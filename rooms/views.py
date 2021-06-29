@@ -1,4 +1,3 @@
-from rest_framework.generics import RetrieveAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -17,7 +16,6 @@ class RoomsView(APIView):
             return Response(status=status.HTTP_401_UNAUTHORIZED)
         serializer = WriteRoomSerializer(data=request.data)
         if serializer.is_valid():
-            print("v")
             room = serializer.save(user=request.user)
             room_serializer = ReadRoomSerializer(room)
             return Response(data=room_serializer.data, status=status.HTTP_200_OK)
@@ -27,14 +25,41 @@ class RoomsView(APIView):
 
 class SeeRoomView(APIView):
 
-    def get(self, request, pk):
+    def get_room(self, pk):
         try:
             room = Room.objects.get(pk=pk)
+            return room
+        except Room.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        room = self.get_room(pk)
+        if room is not None:
             serializer = ReadRoomSerializer(room)
             return Response(data=serializer.data, status=status.HTTP_200_OK)
-        except Room.DoesNotExist:
-            return Response(status=status.HTTP_404_NOT_FOUND)
-    def post(self, request):
-        pass
-    def put(self, request):
-        pass
+        elif room is None:
+            return Response(data="room isn`t exist", status=status.HTTP_404_NOT_FOUND)
+
+    def delete(self, request, pk):
+        room = self.get_room(pk)
+        if room.user != request.user:
+            return Response(data="Unauthorized User", status=status.HTTP_401_UNAUTHORIZED)
+        if room is not None:
+            serializer = ReadRoomSerializer(room)
+            room.delete()
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        room = self.get_room(pk)
+        if room is not None:
+            if room.user != request.user:
+                return Response(status=status.HTTP_401_UNAUTHORIZED)
+            serializer = WriteRoomSerializer(room, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            return Response(data=serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(data="room for update isn`t exist", status=status.HTTP_404_NOT_FOUND)
+
