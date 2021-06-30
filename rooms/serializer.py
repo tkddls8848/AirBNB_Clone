@@ -39,13 +39,15 @@ class WriteRoomSerializer(serializers.Serializer):
         return Room.objects.create(**validated_data)
 
     def validate(self, data):
-        if not self.instance:
-            if data.get("check_in") == data.get("check_out"):
-                print(data.get("check_in"), data.get("check_out"))
-                raise serializers.ValidationError("Room is Big. but, Not Enough Time to Check out")
+        if self.instance:
+            check_in = data.get("check_in", self.instance.check_in)
+            check_out = data.get("check_out", self.instance.check_out)
         else:
-            print("Validate Room OK")
-            return data
+            check_in = data.get("check_in")
+            check_out = data.get("check_out")
+        if check_in == check_out:
+            raise serializers.ValidationError("Not enought time for changes")
+
 
     def update(self, instance, validated_data):
         pass
