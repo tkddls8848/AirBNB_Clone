@@ -3,13 +3,9 @@ from .models import Room
 from users.serializer import UserSerializer
 
 
-class ReadRoomSerializer(serializers.ModelSerializer):
+class RoomSerializer(serializers.ModelSerializer):
 
-    user = UserSerializer()
 
-    class Meta:
-        model = Room
-        exclude = ("modified",)
 
     def validate(self, data):
         if data["beds"] < 5:
@@ -22,12 +18,14 @@ class ReadRoomSerializer(serializers.ModelSerializer):
                 return data
 
 
-class WriteRoomSerializer(serializers.ModelSerializer):
+class RoomSerializer(serializers.ModelSerializer):
+
+    user = UserSerializer()
 
     class Meta:
         model = Room
-        exclude = ("user", "modified", "created",)
-
+        exclude = ("modified",)
+        read_only_field = ("user", "id", "created", "updated")
 
     def create(self, validated_data):
         return Room.objects.create(**validated_data)
