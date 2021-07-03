@@ -2,7 +2,7 @@ from .models import User
 from rest_framework import serializers
 
 
-class UserSerializer(serializers.ModelSerializer):
+class RelatedUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         exclude = ("groups",
@@ -15,3 +15,8 @@ class UserSerializer(serializers.ModelSerializer):
                    "date_joined",
                    "favs")
 
+class ReadUserSerializer(serializers.ModelSerializer):
+    pass
+
+class WriteUserSerializer(serializers.ModelSerializer):
+    pass
