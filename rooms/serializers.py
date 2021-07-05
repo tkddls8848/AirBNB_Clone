@@ -1,26 +1,11 @@
 from rest_framework import serializers
 from .models import Room
-from users.serializer import UserSerializer
+from users.serializers import ReadUserSerializer
 
 
 class RoomSerializer(serializers.ModelSerializer):
 
-
-
-    def validate(self, data):
-        if data["beds"] < 5:
-            raise serializers.ValidationError("Room is too small")
-        else:
-            if data["check_in"] == data["check_out"]:
-                raise serializers.ValidationError("Room is Big. but, Not Enough Time to Check out")
-            else:
-                print("Validate Room OK")
-                return data
-
-
-class RoomSerializer(serializers.ModelSerializer):
-
-    user = UserSerializer()
+    user = ReadUserSerializer()
 
     class Meta:
         model = Room
