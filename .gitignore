@@ -1,7 +1,8 @@
+# Django Secret key
+config/SECRET_KEY.json
+
 # Created by https://www.toptal.com/developers/gitignore/api/django
 # Edit at https://www.toptal.com/developers/gitignore?templates=django
-/config/SECRET_KEY.py
-
 ### Django ###
 *.log
 *.pot
