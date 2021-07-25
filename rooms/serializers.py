@@ -6,6 +6,7 @@ from users.serializers import UserSerializer
 class RoomSerializer(serializers.ModelSerializer):
 
     user = UserSerializer()
+    is_fav = serializers.SerializerMethodField()
 
     class Meta:
         model = Room
@@ -40,3 +41,12 @@ class RoomSerializer(serializers.ModelSerializer):
         instance.instant_book = validated_data.get("instant_book", instance.instant_book)
         instance.save()
         return instance
+
+    def get_is_fav(self, obj):
+        request = self.context.get("request")
+        print(request)
+        if request:
+            user = request.user
+            if user.is_authenticated:
+                return obj in user.favs.all()
+        return False
