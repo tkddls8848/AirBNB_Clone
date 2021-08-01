@@ -3,6 +3,6 @@ from . import views
 
 app_name = "rooms"
 router = DefaultRouter()
-router.register("", views.RoomSet)
+router.register("", views.RoomViewSet)
 
 urlpatterns = router.urls

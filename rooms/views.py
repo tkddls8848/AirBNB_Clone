@@ -11,7 +11,7 @@ class OwnPagination(PageNumberPagination):
     page_size = 20
 
 
-class RoomSet(ModelViewSet):
+class RoomViewSet(ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
 
