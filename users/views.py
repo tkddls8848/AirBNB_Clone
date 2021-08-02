@@ -2,26 +2,29 @@ from django.contrib.auth import authenticate
 from django.conf import settings
 import jwt
 from rest_framework.decorators import api_view
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAdminUser, IsAuthenticated, AllowAny
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.viewsets import ModelViewSet
 from .serializers import UserSerializer, RelatedUserSerializer
 from rooms.serializers import RoomSerializer
 from rooms.models import Room
 from .models import User
 
 
-class UsersView(APIView):
-    def post(self, request):
-        serializer = UserSerializer(data=request.data)
-        if serializer.is_valid():
-            new_user = serializer.save()
-            return Response(data=UserSerializer(new_user).data, status=status.HTTP_200_OK)
-        else:
-            print("BAD")
-            return Response(data=serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+class UserViewSet(ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
 
+    def get_permissions(self):
+        if self.action == "list":
+            permission_classes = [IsAdminUser]
+        elif self.action == "create" or self.action == "retrieve":
+            permission_classes = [AllowAny]
+        else:
+            permission_classes = [IsAuthenticated]
+        return [permission() for permission in permission_classes]
 
 class MeView(APIView):
     permission_classes = [IsAuthenticated]
