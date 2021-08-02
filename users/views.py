@@ -22,11 +22,35 @@ class UserViewSet(ModelViewSet):
     def get_permissions(self):
         if self.action == "list":
             permission_classes = [IsAdminUser]
-        elif self.action == "create" or self.action == "retrieve":
+        elif self.action == "create" or self.action == "retrieve" or self.action == "favs":
             permission_classes = [AllowAny]
         else:
             permission_classes = [IsSelf | IsAdminUser]
         return [permission() for permission in permission_classes]
+
+    @action(detail=True)
+    def favs(self, request, pk):
+        user = self.get_object()
+        serializer = RoomSerializer(user.favs.all(), many=True)
+        return Response(data=serializer.data)
+
+    @favs.mapping.put
+    def toggle_favs(self, request, pk):
+        pk = request.data.get("pk", None)
+        user = self.get_object()
+        print(pk, user)
+        if pk is not None:
+            try:
+                room = Room.objects.get(pk=pk)
+                if room in user.favs.all():
+                    user.favs.remove(room)
+                else:
+                    user.favs.add(room)
+                return Response(data=UserSerializer(user).data)
+            except Room.DoesNotExist:
+                return Response(status=status.HTTP_400_BAD_REQUEST, data="No Room")
+        else:
+            return Response(status=status.HTTP_400_BAD_REQUEST, data="User is Not found")
 
     @action(detail=False, methods=["post"])
     def login(self, request):
@@ -42,33 +66,6 @@ class UserViewSet(ModelViewSet):
             return Response(data={"token": encoded_jwt, "id": user.id, "message": "Hello, world"})
         else:
             return Response(status=status.HTTP_401_UNAUTHORIZED)
-
-
-class FavsView(APIView):
-
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request):
-        user = request.user
-        serializer = RoomSerializer(user.favs.all(), many=True)
-        return Response(data=serializer.data)
-
-    def put(self, request):
-        pk = request.data.get("pk", None)
-        user = request.user
-        if pk is not None:
-            try:
-                room = Room.objects.get(pk=pk)
-                if room in user.favs.all():
-                    user.favs.remove(room)
-                else:
-                    user.favs.add(room)
-                return Response(data=UserSerializer(user).data)
-            except Room.DoesNotExist:
-                pass
-        else:
-            return Response(status=status.HTTP_400_BAD_REQUEST)
-
 
 
 @api_view(["GET"])
